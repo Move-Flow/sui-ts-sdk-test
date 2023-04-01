@@ -12,5 +12,6 @@ const connection = new Connection({
   const provider = new JsonRpcProvider(connection);
   // get tokens from a custom faucet server
   const received = await provider.requestSuiFromFaucet(address);
-  console.log(received);
+  console.log("SUI token received:", received);
+  console.log("Please refer to https://github.com/MystenLabs/sui/tree/main/sdk/typescript#writing-apis for other API calls");
 })();  
