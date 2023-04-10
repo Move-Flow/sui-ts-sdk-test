@@ -1,10 +1,14 @@
 
 const webConfig = "APTOS";
 
-const withdraw_apt = (amount: number/*, department: string*/): [number] => {
+interface Result {
+    amount: number;
+  }
+
+const withdraw_apt = (amount: number/*, department: string*/): Result => {
     console.log("webConfig in fn", webConfig);
     console.log("input in fn", amount);
-    return [amount * 2];
+    return {amount: amount * 2};
 };
 
 function webPortal<F extends (arg: any) => any>(action: string, f: F, arg: Parameters<F>): ReturnType<F> {
