@@ -6,6 +6,7 @@
   "scripts": {
     "test": "run-s basic bcs_transaction multisig_transaction",
     "basic": "ts-node index.ts",
+    "mult": "ts-node multi-backend.ts",
     "bcs_transaction": "ts-node bcs_transaction.ts",
     "multisig_transaction": "ts-node multisig_transaction.ts"
   },
