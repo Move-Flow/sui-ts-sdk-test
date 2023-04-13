@@ -1,16 +1,47 @@
 import { JsonRpcProvider, Connection, Ed25519Keypair, PaginatedEvents, SuiAddress } from '@mysten/sui.js';
 // Construct your connection:
+// const connection = new Connection({
+//   fullnode: 'https://fullnode.testnet.sui.io',
+//   faucet: 'https://faucet.devnet.sui.io/gas',
+// });
 const connection = new Connection({
-  fullnode: 'https://fullnode.testnet.sui.io',
+  fullnode: 'https://fullnode.devnet.sui.io',
   faucet: 'https://faucet.devnet.sui.io/gas',
 });
 
-const sender = "0x4caa76bc098abc3bb92339909b06d648d17bf68bae891abe0c291bf3a4f06ac2";
-const receiver = "0xe6b12a5ef66c79ccc22c6f730a66667c767e18b28aab84c68d140e206a7e4dfc";
+const sender = "0x58e3511aa31f0bd694d95ad6148e33cb45c52356eca673847c51dd3b13a66983";
+const receiver = "0x0d761eeee7593abb700b8cb5cae0e02080b797d250e07f342044c78cc5b31947";
 
+
+const getStreamsBySender = async (provider: JsonRpcProvider, senderAddress: SuiAddress) => {
+  const SuiEventFilter = {Sender: senderAddress}; 
+  const events: PaginatedEvents = await provider.queryEvents({
+    query: SuiEventFilter,
+    limit: 10,
+    order: "descending",
+  });
+  console.log("events", JSON.parse(JSON.stringify(events?.data[0])), events?.data.length);
+
+  const _streamIds: string[] = events?.data.map( (x) => x.parsedJson?.id );
+  const streamIds = [...new Set(_streamIds)];
+  console.log("_streamIds", streamIds);
+
+  const suiObjectDataOptions = {
+    showType: true,
+    showContent: true,
+  };
+  const streams = await provider.multiGetObjects({
+    ids: streamIds,
+    options: suiObjectDataOptions,
+  });
+  console.log("streams", streams);
+
+  const streamPayloads = streams.map( (x) => JSON.parse(JSON.stringify(x.data?.content)) );
+  console.log("streamPayloads", streamPayloads);
+}
 
 const getStreamsByReceiver = async (provider: JsonRpcProvider, recvAddress: SuiAddress): Promise<any[]> => {
-  const packageId = "0x0ec52c563ddc7db9b3ae5f6fad2420fcbf7899e0a2a744569584689a59c4759a";
+  const packageId = "0xeb9b58b9ef88e2320eb447400cf1c514b2f12a38ef7daf36b5d4fa26ac0cf03a";
   const eventType = `${packageId}::stream::StreamEvent`;
   const SuiEventFilter = { MoveEventType: eventType }; 
 
@@ -28,12 +59,13 @@ const getStreamsByReceiver = async (provider: JsonRpcProvider, recvAddress: SuiA
 
   const events: PaginatedEvents = await provider.queryEvents({
     query: SuiEventFilter,
-    limit: 300,
+    limit: 1,
     order: "descending",
   });
-  console.log("events", JSON.parse(JSON.stringify(events?.data)));
+  console.log("events", JSON.parse(JSON.stringify(events?.data[0])));
 
-  const streamIds: string[] = events?.data.map( (x) => x.parsedJson?.id );
+  const _streamIds: string[] = events?.data.map( (x) => x.parsedJson?.id );
+  const streamIds = [...new Set(_streamIds)];
   console.log("_streamIds", streamIds);
 
   const suiObjectDataOptions = {
@@ -69,6 +101,7 @@ const getStreamsByReceiver = async (provider: JsonRpcProvider, recvAddress: SuiA
   console.log("SUI token balance:", balance);
 
   await getStreamsByReceiver(provider, sender);
+  // await getStreamsBySender(provider, sender);
 
   console.log("Please refer to https://github.com/MystenLabs/sui/tree/main/sdk/typescript#writing-apis for other API calls");
 })();  
